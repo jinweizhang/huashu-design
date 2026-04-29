@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BingX Card · Revolut-language redesign</title>
+<style>
+  /* ============================================================
+     Open Design · mobile-app skill
+     Brief: redesign BingX Card screen (Figma: bingxcard-优化, node 9:3558)
+     Direction: Revolut design system (DESIGN.md, OD repo)
+     ============================================================ */
+
+  :root {
+    /* Revolut tokens — bound verbatim from design-systems/revolut/DESIGN.md */
+    --rui-dark:       #191c1f;
+    --rui-white:      #ffffff;
+    --rui-surface:    #f4f4f4;
+    --rui-grey-20:    #c9c9cd;
+    --rui-cool-gray:  #8d969e;
+    --rui-mid-slate:  #505a63;
+    --rui-blue:       #494fdf;
+    --rui-teal:       #00a87e;
+    --rui-deep-pink:  #e61e49;
+    --rui-warning:    #ec7e00;
+    --rui-brown:      #936d62;
+
+    /* Page tokens */
+    --bg:      var(--rui-dark);
+    --surface: var(--rui-white);
+    --fg:      var(--rui-dark);
+    --muted:   var(--rui-cool-gray);
+    --border:  var(--rui-grey-20);
+    --accent:  var(--rui-dark);
+
+    /* Type stacks — Aeonik Pro display + Inter body, per Revolut DESIGN.md */
+    --font-display: 'Aeonik Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Phone canvas */
+    --device-w: 390px;
+    --device-h: 844px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #2a2e33 0%, transparent 60%),
+      radial-gradient(900px 700px at 0% 110%, #1f2226 0%, transparent 55%),
+      var(--rui-dark);
+    color: var(--rui-white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---------- Showcase stage ---------- */
+  .stage {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 64px 24px;
+    gap: 56px;
+  }
+  @media (min-width: 1100px) {
+    .stage {
+      grid-template-columns: 1fr auto;
+      gap: 96px;
+      padding: 80px 80px;
+      justify-items: start;
+    }
+    .stage .meta { max-width: 520px; }
+  }
+
+  .meta {
+    color: var(--rui-white);
+    max-width: 640px;
+  }
+  .meta .kicker {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .meta h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(56px, 8.5vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  .meta h1 em {
+    font-style: normal;
+    color: var(--rui-cool-gray);
+  }
+  .meta p {
+    font-size: 18px;
+    line-height: 1.56;
+    color: rgba(255, 255, 255, 0.72);
+    letter-spacing: -0.005em;
+    max-width: 48ch;
+    margin-bottom: 32px;
+  }
+  .meta .legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 24px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+    max-width: 520px;
+  }
+  .meta .legend dt {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .meta .legend dd { color: rgba(255, 255, 255, 0.85); }
+
+  /* ---------- Phone frame: iPhone 15 Pro, 390 × 844 ---------- */
+  .phone {
+    width: var(--device-w);
+    height: var(--device-h);
+    background: var(--rui-white);
+    border-radius: 56px;
+    position: relative;
+    /* Hard outer bezel — single titanium-feel ring, no glow stack */
+    box-shadow:
+      inset 0 0 0 2px rgba(0,0,0,0.04),
+      0 0 0 12px #0c0e10,
+      0 0 0 13px #2a2e33,
+      0 60px 120px -40px rgba(0,0,0,0.65);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .phone .screen {
+    position: absolute;
+    inset: 0;
+    background: var(--rui-white);
+    color: var(--rui-dark);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- iOS chrome ---- */
+  .status-bar {
+    height: 54px;
+    padding: 22px 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--rui-dark);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .status-bar .icons {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .status-bar svg { display: block; }
+
+  /* Dynamic Island */
+  .island {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 124px;
+    height: 36px;
+    background: #0c0e10;
+    border-radius: 999px;
+    z-index: 30;
+  }
+
+  /* Home indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: var(--rui-dark);
+    border-radius: 999px;
+    z-index: 30;
+    opacity: 0.95;
+  }
+
+  /* ---- App content ---- */
+  .app {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--rui-white);
+  }
+
+  /* Top bar */
+  .topbar {
+    padding: 14px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 999px;
+    background: var(--rui-dark);
+    color: var(--rui-white);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .topbar .seg {
+    display: inline-flex;
+    background: var(--rui-surface);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .topbar .seg button {
+    border: 0;
+    background: transparent;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--rui-mid-slate);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: -0.005em;
+  }
+  .topbar .seg button.active {
+    background: var(--rui-white);
+    color: var(--rui-dark);
+    box-shadow: 0 0 0 1px rgba(25,28,31,0.05);
+  }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 999px;
+    background: var(--rui-surface);
+    display: grid;
+    place-items: center;
+    color: var(--rui-dark);
+    border: 0;
+    cursor: pointer;
+  }
+
+  /* Card hero */
+  .hero {
+    padding: 8px 24px 4px;
+  }
+  .hero .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rui-cool-gray);
+    margin-bottom: 8px;
+  }
+  .hero .balance {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .hero .balance .amount {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.0;
+    letter-spacing: -0.022em;
+    color: var(--rui-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .hero .balance .currency {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    color: var(--rui-cool-gray);
+    padding-bottom: 8px;
+  }
+  .hero .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--rui-teal);
+    letter-spacing: -0.005em;
+  }
+  .hero .delta .dot {
+    width: 6px; height: 6px; border-radius: 999px; background: currentColor;
+  }
+
+  /* Physical card visual */
+  .card-stage {
+    margin: 16px 24px 0;
+    aspect-ratio: 1.586 / 1;     /* ISO/IEC 7810 ID-1 */
+    border-radius: 22px;
+    background: var(--rui-dark);
+    color: var(--rui-white);
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card-stage::before {
+    /* Subtle metallic gradient — Revolut Metal-style depth via color, not shadow */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 80% at 80% 0%, rgba(255,255,255,0.08), transparent 60%),
+      radial-gradient(80% 60% at 0% 100%, rgba(255,255,255,0.04), transparent 70%);
+    pointer-events: none;
+  }
+  .card-stage .row { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+  .card-stage .brand {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .card-stage .brand .x {
+    color: var(--rui-deep-pink);
+  }
+  .card-stage .chip {
+    width: 36px; height: 26px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #d6c79a 0%, #9b8a55 100%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+  }
+  .card-stage .pan {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.16em;
+    color: rgba(255,255,255,0.92);
+    margin-top: auto;
+    font-variant-numeric: tabular-nums;
+  }
+  .card-stage .footer-row {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    position: relative;
+    z-index: 1;
+  }
+  .card-stage .footer-row .lbl {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 4px;
+  }
+  .card-stage .footer-row .val {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .card-stage .scheme {
+    width: 56px; height: 24px;
+    display: grid;
+    place-items: center;
+    color: var(--rui-white);
+  }
+  .card-stage .scheme svg { width: 100%; height: 100%; }
+
+  /* Action pills */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 18px 24px 6px;
+  }
+  .action {
+    background: var(--rui-surface);
+    border-radius: 18px;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--rui-dark);
+    border: 0;
+    cursor: pointer;
+  }
+  .action .ic {
+    width: 28px; height: 28px;
+    display: grid;
+    place-items: center;
+    color: var(--rui-dark);
+  }
+  .action .lbl {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Section row */
+  .row-head {
+    padding: 22px 24px 10px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .row-head h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.012em;
+    color: var(--rui-dark);
+  }
+  .row-head a {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--rui-mid-slate);
+    text-decoration: none;
+    letter-spacing: -0.005em;
+  }
+
+  /* Spend chips strip */
+  .chips {
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip-pill {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--rui-white);
+    border: 1.5px solid var(--rui-dark);
+    color: var(--rui-dark);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+  }
+  .chip-pill.muted {
+    background: var(--rui-surface);
+    border-color: var(--rui-surface);
+    color: var(--rui-mid-slate);
+  }
+
+  /* Transactions */
+  .txns {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 24px 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .txn-day {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rui-cool-gray);
+    margin: 14px 0 8px;
+  }
+  .txn {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 0;
+  }
+  .txn .glyph {
+    width: 40px; height: 40px;
+    border-radius: 999px;
+    background: var(--rui-surface);
+    color: var(--rui-dark);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+  .txn.crypto .glyph { background: var(--rui-dark); color: var(--rui-white); }
+  .txn .body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .txn .merchant {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--rui-dark);
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .txn .meta {
+    font-size: 12px;
+    color: var(--rui-cool-gray);
+    letter-spacing: 0.16px;
+  }
+  .txn .amt {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .txn .amt .v {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--rui-dark);
+    letter-spacing: -0.005em;
+    font-variant-numeric: tabular-nums;
+  }
+  .txn .amt .v.neg { color: var(--rui-dark); }
+  .txn .amt .v.pos { color: var(--rui-teal); }
+  .txn .amt .src {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--rui-cool-gray);
+  }
+
+  /* Bottom CTA pill — primary dark, 14px 32px, 9999px */
+  .cta-bar {
+    padding: 4px 24px 14px;
+    background: linear-gradient(to top, var(--rui-white), rgba(255,255,255,0));
+  }
+  .cta {
+    width: 100%;
+    background: var(--rui-dark);
+    color: var(--rui-white);
+    border: 0;
+    border-radius: 9999px;
+    padding: 14px 32px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+  }
+  .cta:hover { opacity: 0.85; }
+
+  /* Tab bar */
+  .tabbar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--rui-surface);
+    background: var(--rui-white);
+    padding: 8px 8px 22px;
+  }
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--rui-cool-gray);
+    background: none;
+    border: 0;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--rui-dark); }
+  .tab .lbl {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" data-od-id="stage">
+
+    <!-- ============= meta panel ============= -->
+    <aside class="meta" data-od-id="meta">
+      <div class="kicker">Open Design · mobile-app skill</div>
+      <h1>BingX Card<br/><em>spoken in Revolut.</em></h1>
+      <p>
+        A redesign of the BingX Card home screen — same crypto-funded debit utility, recomposed in
+        Revolut's design language. Aeonik Pro 500 display, Inter body with positive tracking, the
+        full pill-everything button system at 9999px, and zero shadows. Depth comes from contrast,
+        not blur.
+      </p>
+      <dl class="legend">
+        <dt>Skill</dt>      <dd>open-design / mobile-app</dd>
+        <dt>Direction</dt>  <dd>Revolut DESIGN.md</dd>
+        <dt>Frame</dt>      <dd>iPhone 15 Pro · 390 × 844</dd>
+        <dt>Display</dt>    <dd>Aeonik Pro 500</dd>
+        <dt>Body</dt>       <dd>Inter · +0.16 letter-spacing</dd>
+        <dt>Radii</dt>      <dd>22 / 18 / 999</dd>
+        <dt>Shadows</dt>    <dd>0 — flat by design</dd>
+        <dt>Accent budget</dt><dd>Teal +Δ · Pink wordmark · once each</dd>
+      </dl>
+    </aside>
+
+    <!-- ============= phone ============= -->
+    <div class="phone" data-od-id="phone" aria-label="iPhone 15 Pro mockup">
+      <div class="island" aria-hidden="true"></div>
+      <div class="screen">
+
+        <!-- ---- iOS status bar ---- -->
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="icons" aria-hidden="true">
+            <!-- signal -->
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+              <rect x="0"  y="8" width="3" height="4" rx="0.5" fill="#191c1f"/>
+              <rect x="5"  y="6" width="3" height="6" rx="0.5" fill="#191c1f"/>
+              <rect x="10" y="3" width="3" height="9" rx="0.5" fill="#191c1f"/>
+              <rect x="15" y="0" width="3" height="12" rx="0.5" fill="#191c1f"/>
+            </svg>
+            <!-- wifi -->
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+              <path d="M8.5 11.4l1.2-1.2a1.7 1.7 0 0 0-2.4 0l1.2 1.2Z" fill="#191c1f"/>
+              <path d="M5.5 8.4a4.2 4.2 0 0 1 6 0l-1 1a2.8 2.8 0 0 0-4 0l-1-1Z" fill="#191c1f"/>
+              <path d="M2.5 5.4a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1Z" fill="#191c1f"/>
+            </svg>
+            <!-- battery -->
+            <svg width="27" height="12" viewBox="0 0 27 12" fill="none">
+              <rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="#191c1f" fill="none"/>
+              <rect x="2"   y="2"   width="17" height="8"  rx="1.5" fill="#191c1f"/>
+              <rect x="24"  y="4"   width="2"  height="4"  rx="0.5" fill="#191c1f"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="app">
+
+          <!-- ---- top bar ---- -->
+          <div class="topbar" data-od-id="topbar">
+            <div class="avatar" aria-label="Profile">L</div>
+            <div class="seg" role="tablist" aria-label="Card mode">
+              <button class="active" type="button">Virtual</button>
+              <button type="button">Physical</button>
+            </div>
+            <button class="icon-btn" type="button" aria-label="Card settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M19.4 15a1.7 1.7 0 0 0 .35 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15.06 19a1.7 1.7 0 0 0-1.06 1.55v.18a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.35l-.06.06A2 2 0 1 1 4.13 16.66l.06-.06A1.7 1.7 0 0 0 4.54 14.7a1.7 1.7 0 0 0-1.55-1.06H2.81a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.46 8.5a1.7 1.7 0 0 0-.35-1.87l-.06-.06A2 2 0 1 1 6.88 3.74l.06.06a1.7 1.7 0 0 0 1.87.35h.05A1.7 1.7 0 0 0 9.92 2.6V2.42a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 14.98 4.07a1.7 1.7 0 0 0 1.87-.35l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.35 1.87v.05A1.7 1.7 0 0 0 21 9.92h.18a2 2 0 1 1 0 4h-.1A1.7 1.7 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- ---- balance hero ---- -->
+          <section class="hero" data-od-id="hero" aria-label="Card balance">
+            <div class="label">Available to spend</div>
+            <div class="balance">
+              <span class="amount">2,418.<span style="color:var(--rui-cool-gray)">62</span></span>
+              <span class="currency">USDT</span>
+            </div>
+            <span class="delta" aria-label="Up 1.4 percent today">
+              <span class="dot" aria-hidden="true"></span> +1.4% today · funded from spot
+            </span>
+          </section>
+
+          <!-- ---- card visual ---- -->
+          <article class="card-stage" data-od-id="card-visual" aria-label="BingX Card">
+            <div class="row">
+              <div class="brand">Bing<span class="x">X</span> Card</div>
+              <div class="chip" aria-hidden="true"></div>
+            </div>
+            <div class="pan" aria-label="Card number">5224 •••• •••• 7831</div>
+            <div class="footer-row">
+              <div>
+                <div class="lbl">Cardholder</div>
+                <div class="val">L. ZHANG</div>
+              </div>
+              <div>
+                <div class="lbl">Expires</div>
+                <div class="val">09 / 28</div>
+              </div>
+              <div class="scheme" aria-label="Mastercard">
+                <svg viewBox="0 0 56 24" fill="none" aria-hidden="true">
+                  <circle cx="22" cy="12" r="10" fill="#e61e49"/>
+                  <circle cx="34" cy="12" r="10" fill="#ec7e00"/>
+                  <path d="M28 4.7a10 10 0 0 1 0 14.6 10 10 0 0 1 0-14.6Z" fill="#ffffff" opacity="0.55"/>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <!-- ---- quick actions ---- -->
+          <nav class="actions" data-od-id="actions" aria-label="Quick actions">
+            <button class="action" type="button">
+              <span class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="lbl">Top up</span>
+            </button>
+            <button class="action" type="button">
+              <span class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 12h12m0 0-4-4m4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M20 6v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="lbl">Convert</span>
+            </button>
+            <button class="action" type="button">
+              <span class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <rect x="3.5" y="6"  width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M3.5 10h17" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M7 14.5h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="lbl">Freeze</span>
+            </button>
+            <button class="action" type="button">
+              <span class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M12 8v4l2.5 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="lbl">Limits</span>
+            </button>
+          </nav>
+
+          <!-- ---- spending chips ---- -->
+          <div class="row-head">
+            <h2>Spending</h2>
+            <a href="#">Statements →</a>
+          </div>
+          <div class="chips" data-od-id="chips" role="tablist">
+            <button class="chip-pill" role="tab" aria-selected="true">Today</button>
+            <button class="chip-pill muted" role="tab">Week</button>
+            <button class="chip-pill muted" role="tab">Month</button>
+            <button class="chip-pill muted" role="tab">By merchant</button>
+            <button class="chip-pill muted" role="tab">By category</button>
+          </div>
+
+          <!-- ---- transactions ---- -->
+          <section class="txns" data-od-id="txns" aria-label="Recent transactions">
+            <div class="txn-day">Today · 28 Apr</div>
+
+            <div class="txn">
+              <div class="glyph">B</div>
+              <div class="body">
+                <div class="merchant">Blue Bottle Coffee</div>
+                <div class="meta">10:42 · Tokyo · USDT → JPY</div>
+              </div>
+              <div class="amt">
+                <div class="v neg">−¥ 720</div>
+                <div class="src">4.81 USDT</div>
+              </div>
+            </div>
+
+            <div class="txn">
+              <div class="glyph">U</div>
+              <div class="body">
+                <div class="merchant">Uber Eats</div>
+                <div class="meta">09:18 · Tokyo · USDT → JPY</div>
+              </div>
+              <div class="amt">
+                <div class="v neg">−¥ 1,840</div>
+                <div class="src">12.30 USDT</div>
+              </div>
+            </div>
+
+            <div class="txn crypto">
+              <div class="glyph">↺</div>
+              <div class="body">
+                <div class="merchant">Top up from Spot</div>
+                <div class="meta">08:55 · Auto-fund · BTC → USDT</div>
+              </div>
+              <div class="amt">
+                <div class="v pos">+ 250.00</div>
+                <div class="src">USDT</div>
+              </div>
+            </div>
+
+            <div class="txn-day">Yesterday · 27 Apr</div>
+
+            <div class="txn">
+              <div class="glyph">M</div>
+              <div class="body">
+                <div class="merchant">MUJI · Ginza</div>
+                <div class="meta">19:04 · Tokyo · USDT → JPY</div>
+              </div>
+              <div class="amt">
+                <div class="v neg">−¥ 4,290</div>
+                <div class="src">28.66 USDT</div>
+              </div>
+            </div>
+
+            <div class="txn">
+              <div class="glyph">N</div>
+              <div class="body">
+                <div class="merchant">Netflix</div>
+                <div class="meta">06:00 · Subscription · USDT → USD</div>
+              </div>
+              <div class="amt">
+                <div class="v neg">−$ 15.99</div>
+                <div class="src">15.99 USDT</div>
+              </div>
+            </div>
+
+            <div class="txn">
+              <div class="glyph">A</div>
+              <div class="body">
+                <div class="merchant">Apple.com / Bill</div>
+                <div class="meta">04:27 · Cupertino · USDT → USD</div>
+              </div>
+              <div class="amt">
+                <div class="v neg">−$ 0.99</div>
+                <div class="src">0.99 USDT</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---- primary CTA ---- -->
+          <div class="cta-bar">
+            <button class="cta" type="button">Pay or send</button>
+          </div>
+
+          <!-- ---- tab bar ---- -->
+          <nav class="tabbar" aria-label="Primary">
+            <button class="tab" type="button">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span class="lbl">Home</span>
+            </button>
+            <button class="tab active" type="button">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.6"/></svg>
+              <span class="lbl">Card</span>
+            </button>
+            <button class="tab" type="button">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 18V8m4 10V4m4 14v-7m4 7V9m4 9v-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span class="lbl">Markets</span>
+            </button>
+            <button class="tab" type="button">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span class="lbl">Activity</span>
+            </button>
+            <button class="tab" type="button">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M5 19a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span class="lbl">Profile</span>
+            </button>
+          </nav>
+        </div>
+
+      </div>
+      <div class="home-indicator" aria-hidden="true"></div>
+    </div>
+  </div>
+</body>
+</html>
